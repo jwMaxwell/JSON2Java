@@ -18,16 +18,16 @@ const escapeToChar = (str) =>
 const getOptions = (args) => {
   packageInfo = readJson("./package.json");
   cli
-    .option("-i, --input <path>", "Path to JSON file")
+    .option("-i, --input <path>", "path to JSON file")
     .option(
       "-o, --output <path>",
-      "Path to Java file (default: stdout)",
+      "path to Java file (default: stdout)",
       "stdout"
     )
-    .option("-t, --indent <number>", "Indentation level (default: 4)", 4)
+    .option("-t, --indent <number>", "indentation level (default: 4)", 4)
     .option(
       "-c, --indent-char <char>",
-      'Indentation character (default: space or "\\s")',
+      'indentation character (default: space or "\\s")',
       "\\s"
     )
     .version(
