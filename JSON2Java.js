@@ -34,31 +34,29 @@ const getOptions = (args) => {
   return cli.opts();
 };
 
-const parse = (text, className, indentChar, indent = 1) => {
-  let res = `class ${className} {\n`;
-  for (const n in text) {
-    res += indentChar.repeat(indent);
-    if (Array.isArray(text[n]))
-      res += `public static String[] ${n} = {"${text[n].join('", "')}"};\n`;
-    else if (text[n] && typeof text[n] === "object")
-      res += `public static ${parse(text[n], n, indentChar, indent + 1)}`;
-    else if (typeof text[n] === "boolean")
-      res += `public static boolean ${n} = ${text[n]};\n`;
-    else if (!isNaN(Number(text[n])))
-      res += `${text[n]}`.includes(".")
-        ? `public static double ${n} = ${text[n]};\n`
-        : `public static int ${n} = ${text[n]};\n`;
-    else
-      res +=
-        text[n].length === 1
-          ? `public static char ${n} = '${text[n]}';\n`
-          : `public static String ${n} = "${text[n]}";\n`;
-  }
-  return res + `${indentChar.repeat(indent - 1)}}\n`;
+const _parse = (text, className, indentChar, indent = 1) => {
+  return `class ${className} {\n${Object.keys(text)
+    .map((n) =>
+      Array.isArray(text[n])
+        ? `public static String[] ${n} = {"${text[n].join('", "')}"};\n`
+        : text[n] && typeof text[n] === "object"
+        ? `public static ${_parse(text[n], n, indentChar, indent + 1)}`
+        : typeof text[n] === "boolean"
+        ? `public static boolean ${n} = ${text[n]};\n`
+        : !isNaN(Number(text[n]))
+        ? `${text[n]}`.includes(".")
+          ? `public static double ${n} = ${text[n]};\n`
+          : `public static int ${n} = ${text[n]};\n`
+        : text[n].length === 1
+        ? `public static char ${n} = '${text[n]}';\n`
+        : `public static String ${n} = "${text[n]}";\n`
+    )
+    .map((n) => indentChar.repeat(indent) + n)
+    .join("")}${indentChar.repeat(indent - 1)}}\n`;
 };
 
 const options = getOptions(process.argv);
-const res = parse(
+const res = _parse(
   readJson(options.input),
   options.input
     .slice(options.input.lastIndexOf("/") + 1, options.input.lastIndexOf("."))
