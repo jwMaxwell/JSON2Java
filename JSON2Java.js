@@ -1,5 +1,5 @@
-const process = require("process");
 const fs = require("fs");
+const cli = require("commander");
 
 const readJson = (path) => JSON.parse(fs.readFileSync(path, "utf8"));
 
@@ -15,58 +15,32 @@ const escapeToChar = (str) =>
     .replace(/\\"/g, '"')
     .replace(/\\\\/g, "\\");
 
-const options = {
-  fileName: "",
-  input: "",
-  output: "stdout",
-  indent: 4,
-  indentChar: " ",
+const getOptions = (args) => {
+  cli
+    .option("-i, --input <path>", "Path to JSON file")
+    .option(
+      "-o, --output <path>",
+      "Path to Java file (default: stdout)",
+      "stdout"
+    )
+    .option("-t, --indent <number>", "Indentation level (default: 4)", 4)
+    .option(
+      "-c, --indent-char <char>",
+      'Indentation character (default: space or "\\s")',
+      "\\s"
+    );
+
+  cli.parse(args);
+  return cli.opts();
 };
-
-const helpText = `Usage: node JSON2Java.js [options]
-Options:
-  -i, --input <path>  Path to JSON file
-  -o, --output <path>  Path to Java file
-  -t, --indent <number>  Indentation level (default: 4)
-  -c, --indent-char <char>  Indentation character (default: space or "\\s")
-  -h, --help            Show this help`;
-
-for (let i = 2; i < process.argv.length; ++i) {
-  switch (process.argv[i]) {
-    case "-i":
-    case "--input":
-      options.fileName = process.argv[i + 1];
-      options.input = readJson(options.fileName);
-      break;
-    case "-t":
-    case "--indent":
-      options.indent = Number(process.argv[i + 1]);
-      break;
-    case "-c":
-    case "--indent-char":
-      options.indentChar = escapeToChar(process.argv[i + 1]);
-      break;
-    case "-o":
-    case "--output":
-      options.output = process.argv[i + 1];
-      break;
-    case "-h":
-    case "--help":
-      console.log(helpText);
-      if (process.argv.length === 3) process.exit(0);
-      break;
-    default:
-      break;
-  }
-}
 
 const parse = (text, className, indentChar, indent = 1) => {
   let res = `class ${className} {\n`;
   for (const n in text) {
     res += indentChar.repeat(indent);
-    if (typeof text[n] === "object" && Array.isArray(text[n]))
+    if (Array.isArray(text[n]))
       res += `public static String[] ${n} = {"${text[n].join('", "')}"};\n`;
-    else if (typeof text[n] === "object")
+    else if (text[n] && typeof text[n] === "object")
       res += `public static ${parse(text[n], n, indentChar, indent + 1)}`;
     else if (typeof text[n] === "boolean")
       res += `public static boolean ${n} = ${text[n]};\n`;
@@ -83,25 +57,15 @@ const parse = (text, className, indentChar, indent = 1) => {
   return res + `${indentChar.repeat(indent - 1)}}\n`;
 };
 
-if (options.output === "stdout") {
-  console.log(
-    parse(
-      options.input,
-      options.fileName
-        .slice(0, options.fileName.lastIndexOf("."))
-        .replace(/\.\//, ""),
-      options.indentChar.repeat(options.indent)
-    )
-  );
-} else {
-  fs.writeFileSync(
-    options.output,
-    parse(
-      options.input,
-      options.fileName
-        .slice(0, options.fileName.lastIndexOf("."))
-        .replace(/\.\//, ""),
-      options.indentChar.repeat(options.indent)
-    )
-  );
-}
+const options = getOptions(process.argv);
+const res = parse(
+  readJson(options.input),
+  options.input
+    .slice(options.input.lastIndexOf("/") + 1, options.input.lastIndexOf("."))
+    .replace(/\.\//, ""),
+  escapeToChar(options.indentChar).repeat(Number(options.indent))
+);
+
+options.output === "stdout"
+  ? console.log(res)
+  : fs.writeFileSync(options.output, parse(res));

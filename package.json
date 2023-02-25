@@ -1,0 +1,22 @@
+{
+  "name": "json2java",
+  "version": "1.0.0",
+  "description": "JSON parser for Java.",
+  "main": "JSON2Java.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwMaxwell/JSON2Java.git"
+  },
+  "author": "Joshua Maxwell",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/jwMaxwell/JSON2Java/issues"
+  },
+  "homepage": "https://github.com/jwMaxwell/JSON2Java#readme",
+  "dependencies": {
+    "commander": "^10.0.0"
+  }
+}
