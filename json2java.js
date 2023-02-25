@@ -16,6 +16,7 @@ const escapeToChar = (str) =>
     .replace(/\\\\/g, "\\");
 
 const getOptions = (args) => {
+  packageInfo = readJson("./package.json");
   cli
     .option("-i, --input <path>", "Path to JSON file")
     .option(
@@ -28,6 +29,13 @@ const getOptions = (args) => {
       "-c, --indent-char <char>",
       'Indentation character (default: space or "\\s")',
       "\\s"
+    )
+    .version(
+      [
+        `${packageInfo.name} ${packageInfo.version}`,
+        `${fs.readFileSync("./LICENSE-stub", "utf8")}`,
+        `Written by ${packageInfo.author}`,
+      ].join("\n")
     );
 
   cli.parse(args);
@@ -67,3 +75,19 @@ const res = _parse(
 options.output === "stdout"
   ? console.log(res)
   : fs.writeFileSync(options.output, parse(res));
+
+///////////////////////////////////////////////////////////////////////////////
+//        Copyright 2023 Joshua Maxwell                                      //
+//                                                                           //
+// Licensed under the Apache License, Version 2.0 (the "License");           //
+// you may not use this file except in compliance with the License.          //
+// You may obtain a copy of the License at                                   //
+//                                                                           //
+//        http://www.apache.org/licenses/LICENSE-2.0                         //
+//                                                                           //
+// Unless required by applicable law or agreed to in writing, software       //
+// distributed under the License is distributed on an "AS IS" BASIS,         //
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  //
+// See the License for the specific language governing permissions and       //
+// limitations under the License.                                            //
+///////////////////////////////////////////////////////////////////////////////
