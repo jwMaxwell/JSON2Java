@@ -64,6 +64,7 @@ const _parse = (text, className, indentChar, indent = 1) => {
 };
 
 const options = getOptions(process.argv);
+if (options.input === undefined) throw new Error("Missing input path");
 const res = _parse(
   readJson(options.input),
   options.input
