@@ -67,9 +67,7 @@ const options = getOptions(process.argv);
 if (options.input === undefined) throw new Error("Missing input path");
 const res = _parse(
   readJson(options.input),
-  options.input
-    .slice(options.input.lastIndexOf("/") + 1, options.input.lastIndexOf("."))
-    .replace(/\.\//, ""),
+  options.input.split("/").pop().split(".")[0],
   escapeToChar(options.indentChar).repeat(Number(options.indent))
 );
 
